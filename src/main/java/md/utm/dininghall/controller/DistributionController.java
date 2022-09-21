@@ -1,7 +1,7 @@
 package md.utm.dininghall.controller;
 
-import md.utm.dininghall.controller.request.DistributeOrderRequest;
-import md.utm.dininghall.service.CustomerOrderDistributionService;
+import com.utm.dininghall.controller.request.DistributeOrderRequest;
+import com.utm.dininghall.service.CustomerOrderDistributionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +17,7 @@ public class DistributionController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<?> distribution(@RequestBody DistributeOrderRequest request) {
-        distributionService.invoke(request.getOrderId());
+        distributionService.invoke(request.getOrderId(), request.getItems());
         return ResponseEntity.noContent().build();
     }
 }

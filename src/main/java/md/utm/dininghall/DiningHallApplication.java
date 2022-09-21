@@ -11,5 +11,4 @@ public class DiningHallApplication {
     public static void main(String[] args) {
         SpringApplication.run(DiningHallApplication.class, args);
     }
-
 }

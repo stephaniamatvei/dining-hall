@@ -15,7 +15,7 @@ import java.util.List;
 @Table(name = "customer_order")
 public class CustomerOrder extends BaseIdCodeDrivenEntity {
     private int priority;
-    private int maxWait;
+    private double maxWait;
     private Instant pickUpTime;
 
     @ManyToOne

@@ -1,8 +1,8 @@
 package md.utm.dininghall.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import md.utm.dininghall.core.entity.BaseIdCodeDrivenEntity;
-import md.utm.dininghall.core.entity.CustomerOrder;
+import com.utm.dininghall.core.entity.BaseIdCodeDrivenEntity;
+import com.utm.dininghall.core.entity.CustomerOrder;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -74,7 +74,7 @@ public class SendCustomerOrderToKitchenService {
         long waiterId;
         List<Long> items;
         int priority;
-        int maxWait;
+        double maxWait;
         Instant pickUpTime;
     }
 }

@@ -1,20 +1,24 @@
 package md.utm.dininghall.service;
 
-import md.utm.dininghall.core.constant.RestaurantTableStatusCode;
-import md.utm.dininghall.core.entity.RestaurantTableStatus;
-import md.utm.dininghall.core.entity.Waiter;
-import md.utm.dininghall.core.repository.RestaurantTableRepository;
-import md.utm.dininghall.core.repository.RestaurantTableStatusRepository;
-import md.utm.dininghall.core.repository.WaiterRepository;
+import com.utm.dininghall.core.constant.RestaurantTableStatusCode;
+import com.utm.dininghall.core.entity.RestaurantTable;
+import com.utm.dininghall.core.entity.RestaurantTableStatus;
+import com.utm.dininghall.core.repository.RestaurantTableRepository;
+import com.utm.dininghall.core.repository.RestaurantTableStatusRepository;
+import com.utm.dininghall.core.repository.WaiterRepository;
 import liquibase.repackaged.org.apache.commons.lang3.time.DurationFormatUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import md.utm.dininghall.service.utils.TransactionUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static com.utm.dininghall.core.constant.RestaurantTableStatusCode.WAITING_FOR_ORDER;
+import static com.utm.dininghall.core.constant.RestaurantTableStatusCode.WAITING_FOR_WAITER;
+import static com.utm.dininghall.service.utils.TransactionUtils.registerPostCommit;
 
 @Slf4j
 @Service
@@ -26,7 +30,6 @@ public class SimulationService {
     private final SimulationDataService simulationDataService;
     private final CustomerOrderGenerateService orderGenerateService;
     private final SendCustomerOrderToKitchenService sendCustomerOrderToKitchenService;
-    private final ApplicationContext applicationContext;
 
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
@@ -35,29 +38,39 @@ public class SimulationService {
         simulationDataService.invoke();
 
         final var startTime = System.currentTimeMillis();
-        final var proxy = applicationContext.getBean(getClass());
-
-        waiterRepository.findAll().forEach(proxy::startWaiterWorkThread);
+        simulate();
 
         final var endTime = System.currentTimeMillis();
         final var duration = getFormattedPreparationDuration(endTime - startTime);
 
-        log.info("Finishing serving all tables in {}", duration);
+        log.info("Finishing taking orders from all tables in {}", duration);
     }
 
-    @Transactional
-    void startWaiterWorkThread(Waiter waiter) {
-        final var tableStatusId = getTableStatus(RestaurantTableStatusCode.WAITING_FOR_WAITER).getId();
+    private void simulate() {
+        final var tables = getTablesForServing();
+        final var waiters = waiterRepository.findAll();
 
-        tableRepository.findUnlockedByStatus(tableStatusId).ifPresent((table) -> {
-            table.setWaiterLockId(waiter.getId());
-            table.setStatus(getTableStatus(RestaurantTableStatusCode.WAITING_FOR_ORDER));
+        final var lastWaiterIndex = waiters.size() - 1;
+        var nextWaiterIndex = 0;
 
-            log.info("Waiter '{}' serves table '{}'", waiter.getId(), table.getId());
-            final var order = orderGenerateService.invoke(table, waiter);
+        for (var t : tables) {
+            final var waiter = waiters.get(nextWaiterIndex);
+            log.info("Waiter '{}' serves table '{}'", waiter.getId(), t.getId());
 
-            TransactionUtils.registerPostCommit(() -> sendCustomerOrderToKitchenService.invoke(order));
-        });
+            t.setWaiterLockId(waiter.getId());
+            t.setStatus(getTableStatus(WAITING_FOR_ORDER));
+
+            final var order = orderGenerateService.invoke(t, waiter);
+            registerPostCommit(() -> sendCustomerOrderToKitchenService.invoke(order));
+
+            nextWaiterIndex = lastWaiterIndex == nextWaiterIndex
+                    ? 0 : nextWaiterIndex + 1;
+        }
+    }
+
+    private List<RestaurantTable> getTablesForServing() {
+        final var tableStatus = getTableStatus(WAITING_FOR_WAITER);
+        return tableRepository.findUnlockedByStatus(tableStatus.getId());
     }
 
     private RestaurantTableStatus getTableStatus(RestaurantTableStatusCode code) {

@@ -34,8 +34,9 @@ create table customer_order
 
 create table dish
 (
-    id   bigserial primary key,
-    code text not null
+    id        bigserial primary key,
+    code      text    not null,
+    wait_time numeric not null
 );
 
 create table customer_order_dish
@@ -45,20 +46,20 @@ create table customer_order_dish
     dish_id           bigint references dish           not null
 );
 
-insert into dish (code)
-values ('PIZZA'),
-       ('SALAD'),
-       ('ZEAMA'),
-       ('SCALLOP_SASHIMI_MEYER_LEMON'),
-       ('ISLAND_DUCK_MUSTARD'),
-       ('WAFFLES'),
-       ('AUBERGINE'),
-       ('LASAGNA'),
-       ('BURGER'),
-       ('GYROS'),
-       ('KEBAB'),
-       ('UNAGI_MAKI'),
-       ('TOBACCO_CHICKEN');
+insert into dish (code, wait_time)
+values ('PIZZA', 20),
+       ('SALAD', 10),
+       ('ZEAMA', 7),
+       ('SCALLOP_SASHIMI_MEYER_LEMON', 32),
+       ('ISLAND_DUCK_MUSTARD', 35),
+       ('WAFFLES', 10),
+       ('AUBERGINE', 20),
+       ('LASAGNA', 30),
+       ('BURGER', 15),
+       ('GYROS', 15),
+       ('KEBAB', 15),
+       ('UNAGI_MAKI', 20),
+       ('TOBACCO_CHICKEN', 30);
 
 insert into restaurant_table_status(code)
 values ('FREE'),

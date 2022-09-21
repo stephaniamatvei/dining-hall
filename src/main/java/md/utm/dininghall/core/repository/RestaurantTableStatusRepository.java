@@ -1,7 +1,7 @@
 package md.utm.dininghall.core.repository;
 
-import md.utm.dininghall.core.constant.RestaurantTableStatusCode;
-import md.utm.dininghall.core.entity.RestaurantTableStatus;
+import com.utm.dininghall.core.constant.RestaurantTableStatusCode;
+import com.utm.dininghall.core.entity.RestaurantTableStatus;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
