@@ -1,0 +1,18 @@
+package md.utm.dininghall.core.repository;
+
+import md.utm.dininghall.core.constant.RestaurantTableStatusCode;
+import md.utm.dininghall.core.entity.RestaurantTableStatus;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface RestaurantTableStatusRepository extends CrudRepository<RestaurantTableStatus, Long> {
+
+    Optional<RestaurantTableStatus> findByCode(String code);
+
+    default RestaurantTableStatus findByCode(RestaurantTableStatusCode code) {
+        return findByCode(code.name()).orElseThrow();
+    }
+}
