@@ -18,7 +18,6 @@ import java.util.List;
 
 import static md.utm.dininghall.core.constant.RestaurantTableStatusCode.WAITING_FOR_ORDER;
 import static md.utm.dininghall.core.constant.RestaurantTableStatusCode.WAITING_FOR_WAITER;
-import static md.utm.dininghall.service.utils.TransactionUtils.registerPostCommit;
 
 
 @Slf4j
@@ -30,7 +29,6 @@ public class SimulationService {
     private final WaiterRepository waiterRepository;
     private final SimulationDataService simulationDataService;
     private final CustomerOrderGenerateService orderGenerateService;
-    private final SendCustomerOrderToKitchenService sendCustomerOrderToKitchenService;
 
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
@@ -61,8 +59,8 @@ public class SimulationService {
             t.setWaiterLockId(waiter.getId());
             t.setStatus(getTableStatus(WAITING_FOR_ORDER));
 
-            final var order = orderGenerateService.invoke(t, waiter);
-            registerPostCommit(() -> sendCustomerOrderToKitchenService.invoke(order));
+            // start another thread
+            orderGenerateService.invoke(t, waiter);
 
             nextWaiterIndex = lastWaiterIndex == nextWaiterIndex
                     ? 0 : nextWaiterIndex + 1;

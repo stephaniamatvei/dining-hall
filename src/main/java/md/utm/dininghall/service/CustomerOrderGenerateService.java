@@ -8,6 +8,7 @@ import md.utm.dininghall.core.repository.CustomerOrderRepository;
 import md.utm.dininghall.core.repository.DishRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +27,11 @@ import static java.util.stream.Collectors.toList;
 public class CustomerOrderGenerateService {
     private final DishRepository dishRepository;
     private final CustomerOrderRepository orderRepository;
+    private final SendCustomerOrderToKitchenService sendCustomerOrderToKitchenService;
 
+    @Async
     @Transactional
-    public CustomerOrder invoke(RestaurantTable table, Waiter waiter) {
+    public void invoke(RestaurantTable table, Waiter waiter) {
         log.info("Generating order for table '{}' and waiter '{}'...", table.getId(), waiter.getId());
 
         final var dishes = generateDishes();
@@ -42,7 +45,8 @@ public class CustomerOrderGenerateService {
         order.setDishes(dishes);
         order.setMaxWait(getMaxWait(dishes));
 
-        return orderRepository.save(order);
+        final var savedOrder = orderRepository.save(order);
+        sendCustomerOrderToKitchenService.invoke(savedOrder);
     }
 
     private List<Dish> generateDishes() {
