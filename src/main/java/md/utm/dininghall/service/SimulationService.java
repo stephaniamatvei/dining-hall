@@ -1,14 +1,14 @@
 package md.utm.dininghall.service;
 
-import com.utm.dininghall.core.constant.RestaurantTableStatusCode;
-import com.utm.dininghall.core.entity.RestaurantTable;
-import com.utm.dininghall.core.entity.RestaurantTableStatus;
-import com.utm.dininghall.core.repository.RestaurantTableRepository;
-import com.utm.dininghall.core.repository.RestaurantTableStatusRepository;
-import com.utm.dininghall.core.repository.WaiterRepository;
 import liquibase.repackaged.org.apache.commons.lang3.time.DurationFormatUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import md.utm.dininghall.core.constant.RestaurantTableStatusCode;
+import md.utm.dininghall.core.entity.RestaurantTable;
+import md.utm.dininghall.core.entity.RestaurantTableStatus;
+import md.utm.dininghall.core.repository.RestaurantTableRepository;
+import md.utm.dininghall.core.repository.RestaurantTableStatusRepository;
+import md.utm.dininghall.core.repository.WaiterRepository;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -16,9 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.utm.dininghall.core.constant.RestaurantTableStatusCode.WAITING_FOR_ORDER;
-import static com.utm.dininghall.core.constant.RestaurantTableStatusCode.WAITING_FOR_WAITER;
-import static com.utm.dininghall.service.utils.TransactionUtils.registerPostCommit;
+import static md.utm.dininghall.core.constant.RestaurantTableStatusCode.WAITING_FOR_ORDER;
+import static md.utm.dininghall.core.constant.RestaurantTableStatusCode.WAITING_FOR_WAITER;
+import static md.utm.dininghall.service.utils.TransactionUtils.registerPostCommit;
+
 
 @Slf4j
 @Service

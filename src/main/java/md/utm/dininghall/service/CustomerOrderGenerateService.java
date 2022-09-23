@@ -1,11 +1,11 @@
 package md.utm.dininghall.service;
 
-import com.utm.dininghall.core.entity.CustomerOrder;
-import com.utm.dininghall.core.entity.Dish;
-import com.utm.dininghall.core.entity.RestaurantTable;
-import com.utm.dininghall.core.entity.Waiter;
-import com.utm.dininghall.core.repository.CustomerOrderRepository;
-import com.utm.dininghall.core.repository.DishRepository;
+import md.utm.dininghall.core.entity.CustomerOrder;
+import md.utm.dininghall.core.entity.Dish;
+import md.utm.dininghall.core.entity.RestaurantTable;
+import md.utm.dininghall.core.entity.Waiter;
+import md.utm.dininghall.core.repository.CustomerOrderRepository;
+import md.utm.dininghall.core.repository.DishRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-import static com.utm.dininghall.service.utils.NumberUtils.getRandomNumber;
+import static md.utm.dininghall.service.utils.NumberUtils.getRandomNumber;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j

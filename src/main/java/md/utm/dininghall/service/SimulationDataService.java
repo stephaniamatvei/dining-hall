@@ -1,11 +1,11 @@
 package md.utm.dininghall.service;
 
-import com.utm.dininghall.core.entity.RestaurantTable;
-import com.utm.dininghall.core.entity.Waiter;
-import com.utm.dininghall.core.repository.CustomerOrderRepository;
-import com.utm.dininghall.core.repository.RestaurantTableRepository;
-import com.utm.dininghall.core.repository.RestaurantTableStatusRepository;
-import com.utm.dininghall.core.repository.WaiterRepository;
+import md.utm.dininghall.core.entity.RestaurantTable;
+import md.utm.dininghall.core.entity.Waiter;
+import md.utm.dininghall.core.repository.CustomerOrderRepository;
+import md.utm.dininghall.core.repository.RestaurantTableRepository;
+import md.utm.dininghall.core.repository.RestaurantTableStatusRepository;
+import md.utm.dininghall.core.repository.WaiterRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-import static com.utm.dininghall.core.constant.RestaurantTableStatusCode.WAITING_FOR_WAITER;
+import static md.utm.dininghall.core.constant.RestaurantTableStatusCode.WAITING_FOR_WAITER;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j

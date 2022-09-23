@@ -1,8 +1,8 @@
 package md.utm.dininghall.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.utm.dininghall.core.entity.BaseIdCodeDrivenEntity;
-import com.utm.dininghall.core.entity.CustomerOrder;
+import md.utm.dininghall.core.entity.BaseIdCodeDrivenEntity;
+import md.utm.dininghall.core.entity.CustomerOrder;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

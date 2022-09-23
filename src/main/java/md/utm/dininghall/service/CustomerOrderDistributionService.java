@@ -1,8 +1,8 @@
 package md.utm.dininghall.service;
 
-import com.utm.dininghall.core.entity.BaseIdCodeDrivenEntity;
-import com.utm.dininghall.core.repository.CustomerOrderRepository;
-import com.utm.dininghall.core.repository.RestaurantTableStatusRepository;
+import md.utm.dininghall.core.entity.BaseIdCodeDrivenEntity;
+import md.utm.dininghall.core.repository.CustomerOrderRepository;
+import md.utm.dininghall.core.repository.RestaurantTableStatusRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.utm.dininghall.core.constant.RestaurantTableStatusCode.ORDER_SERVED;
+import static md.utm.dininghall.core.constant.RestaurantTableStatusCode.ORDER_SERVED;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j

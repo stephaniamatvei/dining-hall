@@ -1,7 +1,7 @@
 package md.utm.dininghall.controller;
 
-import com.utm.dininghall.controller.request.DistributeOrderRequest;
-import com.utm.dininghall.service.CustomerOrderDistributionService;
+import md.utm.dininghall.controller.request.DistributeOrderRequest;
+import md.utm.dininghall.service.CustomerOrderDistributionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
