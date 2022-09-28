@@ -1,82 +1,83 @@
 package md.utm.dininghall.service;
 
-import liquibase.repackaged.org.apache.commons.lang3.time.DurationFormatUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import md.utm.dininghall.core.constant.RestaurantTableStatusCode;
-import md.utm.dininghall.core.entity.RestaurantTable;
-import md.utm.dininghall.core.entity.RestaurantTableStatus;
-import md.utm.dininghall.core.repository.RestaurantTableRepository;
-import md.utm.dininghall.core.repository.RestaurantTableStatusRepository;
-import md.utm.dininghall.core.repository.WaiterRepository;
+import md.utm.dininghall.service.dto.CustomerOrderDto;
+import md.utm.dininghall.service.dto.DishDto;
+import md.utm.dininghall.service.dto.RestaurantTableDto;
+import md.utm.dininghall.service.dto.WaiterDto;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
-import static md.utm.dininghall.core.constant.RestaurantTableStatusCode.WAITING_FOR_ORDER;
-import static md.utm.dininghall.core.constant.RestaurantTableStatusCode.WAITING_FOR_WAITER;
+import static java.util.stream.Collectors.toList;
+import static md.utm.dininghall.service.dto.RestaurantTableDto.RestaurantTableStatusCode.*;
 
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class SimulationService {
-    private final RestaurantTableStatusRepository tableStatusRepository;
-    private final RestaurantTableRepository tableRepository;
-    private final WaiterRepository waiterRepository;
     private final SimulationDataService simulationDataService;
     private final CustomerOrderGenerateService orderGenerateService;
+    private List<RestaurantTableDto> restaurantTables;
+    private List<CustomerOrderDto> customerOrders;
 
-    @Transactional
     @EventListener(ApplicationReadyEvent.class)
-    public void invoke() {
+    public void invokeSimulation() {
         log.info("Starting simulation...");
-        simulationDataService.invoke();
 
-        final var startTime = System.currentTimeMillis();
-        simulate();
-
-        final var endTime = System.currentTimeMillis();
-        final var duration = getFormattedPreparationDuration(endTime - startTime);
-
-        log.info("Finishing taking orders from all tables in {}", duration);
+        restaurantTables = simulationDataService.generateRestaurantTables();
+        customerOrders = Collections.synchronizedList(new ArrayList<>());
+        simulationDataService.generateWaiters().forEach(w -> new Thread(() -> startWaiterThread(w)).start());
     }
 
-    private void simulate() {
-        final var tables = getTablesForServing();
-        final var waiters = waiterRepository.findAll();
+    public void distributeOrder(Long orderId, List<Long> cookedDishIds) {
+        log.info("Distributing order '{}'...", orderId);
 
-        final var lastWaiterIndex = waiters.size() - 1;
-        var nextWaiterIndex = 0;
+        final var order = customerOrders.stream()
+                .filter((i) -> i.getId().equals(orderId))
+                .findAny()
+                .orElseThrow();
 
-        for (var t : tables) {
-            final var waiter = waiters.get(nextWaiterIndex);
-            log.info("Waiter '{}' serves table '{}'", waiter.getId(), t.getId());
+        final var orderDishIds = order.getDishes().stream()
+                .map(DishDto::getId)
+                .sorted()
+                .collect(toList());
 
-            t.setWaiterLockId(waiter.getId());
-            t.setStatus(getTableStatus(WAITING_FOR_ORDER));
+        final var sortedCookedDishIds = cookedDishIds.stream()
+                .sorted()
+                .collect(toList());
 
-            // start another thread
-            orderGenerateService.invoke(t, waiter);
+        if (orderDishIds.equals(sortedCookedDishIds)) {
+            final var table = order.getTable();
+            final var lock = table.getLock();
 
-            nextWaiterIndex = lastWaiterIndex == nextWaiterIndex
-                    ? 0 : nextWaiterIndex + 1;
+            lock.lock();
+            table.setStatus(ORDER_SERVED);
+            lock.unlock();
+
+            log.info("Successfully distributed order '{}'...", orderId);
         }
     }
 
-    private List<RestaurantTable> getTablesForServing() {
-        final var tableStatus = getTableStatus(WAITING_FOR_WAITER);
-        return tableRepository.findUnlockedByStatus(tableStatus.getId());
-    }
+    private void startWaiterThread(WaiterDto waiter) {
+        final Predicate<RestaurantTableDto> predicate =
+                (t) -> t.getStatus().equals(WAITING_FOR_WAITER) && t.getLock().tryLock();
 
-    private RestaurantTableStatus getTableStatus(RestaurantTableStatusCode code) {
-        return tableStatusRepository.findByCode(code);
-    }
+        restaurantTables.stream().filter(predicate).findAny().ifPresent((t) -> {
+            log.info("Waiter '{}' serves table '{}'", waiter.getId(), t.getId());
+            t.setStatus(WAITING_FOR_ORDER);
+            t.getLock().unlock();
 
-    private String getFormattedPreparationDuration(long millis) {
-        return DurationFormatUtils.formatDurationWords(millis, true, true);
+            final var order = orderGenerateService.invoke(t, waiter);
+            customerOrders.add(order);
+            startWaiterThread(waiter);
+        });
     }
 }

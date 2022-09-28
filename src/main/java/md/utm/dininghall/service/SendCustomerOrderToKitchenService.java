@@ -1,17 +1,16 @@
 package md.utm.dininghall.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import md.utm.dininghall.core.entity.BaseIdCodeDrivenEntity;
-import md.utm.dininghall.core.entity.CustomerOrder;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import md.utm.dininghall.service.dto.CustomerOrderDto;
+import md.utm.dininghall.service.dto.DishDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.annotation.PostConstruct;
@@ -36,8 +35,7 @@ public class SendCustomerOrderToKitchenService {
                 .baseUrl(kitchenOrderEndpointUrl).build();
     }
 
-    @Transactional
-    public void invoke(CustomerOrder order) {
+    public void invoke(CustomerOrderDto order) {
         log.info("Sending order '{}' to kitchen...", order.getId());
 
         client.post()
@@ -49,9 +47,9 @@ public class SendCustomerOrderToKitchenService {
     }
 
     @SneakyThrows
-    private String createRequest(CustomerOrder order) {
+    private String createRequest(CustomerOrderDto order) {
         final var dishes = order.getDishes().stream()
-                .map(BaseIdCodeDrivenEntity::getId).collect(Collectors.toList());
+                .map(DishDto::getId).collect(Collectors.toList());
 
         final var request = Request.builder()
                 .orderId(order.getId())

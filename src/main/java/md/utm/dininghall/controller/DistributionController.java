@@ -1,8 +1,8 @@
 package md.utm.dininghall.controller;
 
-import md.utm.dininghall.controller.request.DistributeOrderRequest;
-import md.utm.dininghall.service.CustomerOrderDistributionService;
 import lombok.RequiredArgsConstructor;
+import md.utm.dininghall.controller.request.DistributeOrderRequest;
+import md.utm.dininghall.service.SimulationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("distribution")
 public class DistributionController {
-    private final CustomerOrderDistributionService distributionService;
+    private final SimulationService simulationService;
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<?> distribution(@RequestBody DistributeOrderRequest request) {
-        distributionService.invoke(request.getOrderId(), request.getItems());
+        simulationService.distributeOrder(request.getOrderId(), request.getItems());
         return ResponseEntity.noContent().build();
     }
 }

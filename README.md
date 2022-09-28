@@ -2,7 +2,7 @@
 Microservice for pushing orders to the kitchen
 
 ## Used technologies
-Postgres, Java 11, Spring Boot, Docker
+Java 11, Spring Boot, Docker
 
 ## How to run?
 
