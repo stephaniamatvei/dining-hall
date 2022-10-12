@@ -10,6 +10,8 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,6 +47,8 @@ public class SimulationService {
                 .findAny()
                 .orElseThrow();
 
+        final var rating = calculateRating(order.getMaxWait(), order.getPickUpTime());
+
         final var orderDishIds = order.getDishes().stream()
                 .map(DishDto::getId)
                 .sorted()
@@ -62,7 +66,7 @@ public class SimulationService {
             table.setStatus(ORDER_SERVED);
             lock.unlock();
 
-            log.info("Successfully distributed order '{}'...", orderId);
+            log.info("Successfully distributed order '{}' with rating '{}'...", orderId, rating);
         }
     }
 
@@ -79,5 +83,31 @@ public class SimulationService {
             customerOrders.add(order);
             startWaiterThread(waiter);
         });
+    }
+
+    private int calculateRating(double maxWait, Instant pickupTs) {
+        final var actualWait = ChronoUnit.SECONDS.between(pickupTs, Instant.now());
+
+        if (actualWait <= maxWait) {
+            return 5;
+        }
+
+        if (actualWait <= maxWait * 1.1) {
+            return 4;
+        }
+
+        if (actualWait <= maxWait * 1.2) {
+            return 3;
+        }
+
+        if (actualWait <= maxWait * 1.3) {
+            return 2;
+        }
+
+        if (actualWait <= maxWait * 1.4) {
+            return 1;
+        }
+
+        return 0;
     }
 }
