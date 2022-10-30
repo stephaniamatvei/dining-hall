@@ -63,10 +63,23 @@ public class SimulationService {
             final var lock = table.getLock();
 
             lock.lock();
+            order.setDistributed(true);
+            order.setRating(rating);
             table.setStatus(ORDER_SERVED);
             lock.unlock();
 
-            log.info("Successfully distributed order '{}' with rating '{}'...", orderId, rating);
+            final var ordersCount = customerOrders.stream()
+                    .filter(CustomerOrderDto::isDistributed)
+                    .count();
+
+            final var ratingSum = customerOrders.stream()
+                    .filter(CustomerOrderDto::isDistributed)
+                    .mapToDouble(CustomerOrderDto::getRating)
+                    .sum();
+
+            var avgRating = ratingSum / ordersCount;
+
+            log.info("Successfully distributed order '{}' with rating '{}' and average rating '{}'...", orderId, rating, avgRating);
         }
     }
 

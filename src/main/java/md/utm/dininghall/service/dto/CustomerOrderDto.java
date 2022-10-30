@@ -19,4 +19,6 @@ public class CustomerOrderDto {
     private RestaurantTableDto table;
     private WaiterDto waiter;
     private List<DishDto> dishes;
+    private boolean isDistributed;
+    private int rating;
 }
